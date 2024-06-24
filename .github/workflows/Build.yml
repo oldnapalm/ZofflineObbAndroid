@@ -31,18 +31,18 @@ jobs:
     - name: Build APK
       run: ./gradlew assembleRelease
 
+    - name: Align APK
+      run: zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/ZofflineObb.apk
+
     - name: Download keystore
       run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > keystore.jks
 
     - name: Sign APK
       run: |
-        jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore keystore.jks -storepass ${{ secrets.KEYSTORE_PASSWORD }} app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
-
-    - name: Align APK
-      run: zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release.apk
+        apksigner sign --ks keystore.jks --ks-key-alias ${{ secrets.KEY_ALIAS }} --ks-pass ${{ secrets.KEYSTORE_PASSWORD }} app/build/outputs/apk/release/ZofflineObb.apk
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: ZofflineObb
-        path: app/build/outputs/apk/release/*
+        path: app/build/outputs/apk/release/ZofflineObb.apk
